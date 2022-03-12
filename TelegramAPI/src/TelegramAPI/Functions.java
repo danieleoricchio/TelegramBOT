@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.*;
@@ -22,6 +23,11 @@ public class Functions {
 
     private static BufferedReader br;
     private static From f;
+    private static Message m;
+    private static Update u;
+    private static Chat c;
+    private static JSONObject obj;
+    private static long updateId;
 
     public static void getMe(String token) {
         try {
@@ -45,16 +51,17 @@ public class Functions {
         }
     }
 
-    public static void getUpdates(String token) {
+    public static ArrayList<Update> getUpdates() {
+        ArrayList<Update> upd = new ArrayList<Update>();
         try {
-            URL url = new URL(token);
+            URL url = new URL("https://api.telegram.org/bot5275177108:AAEdwgLIJEf04JOh3NAF4a0jCCC6QXSbohU/getUpdates");
             StringBuilder sb = readUrl(url);
-            JSONObject obj = new JSONObject(sb.toString().trim());
+            obj = new JSONObject(sb.toString().trim());
             String pageName = obj.getBoolean("ok") ? "true" : "false";
 
             JSONArray arr = obj.getJSONArray("result");
             for (int i = 0; i < arr.length(); i++) {
-                Chat c = new Chat(arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getLong("id"),
+                c = new Chat(arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getLong("id"),
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getString("first_name"),
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getString("username"),
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getString("type"));
@@ -65,34 +72,24 @@ public class Functions {
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("from").getString("username"),
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("from").getString("language_code"));
 
-                Message m = new Message(arr.getJSONObject(i).getJSONObject("message").getLong("message_id"), f, c,
+                m = new Message(arr.getJSONObject(i).getJSONObject("message").getLong("message_id"), f, c,
                         arr.getJSONObject(i).getJSONObject("message").getLong("date"),
                         arr.getJSONObject(i).getJSONObject("message").getString("text"));
 
-                Update u = new Update(arr.getJSONObject(i).getLong("update_id"), m);
-                System.out.println(u.getUpdate());
-            }
+                u = new Update(arr.getJSONObject(i).getLong("update_id"), m);
+                updateId = arr.getJSONObject(i).getLong("update_id");
 
+                upd.add(u);
+            }
         } catch (MalformedURLException ex) {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return upd;
     }
 
-    public static void sendMessage(String token, long id_chat, String message) {
-        try {
-            if (f != null) {
-                URL url = new URL("https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + id_chat + "&text=" + message);
-                url.openStream();
-            }
-            System.out.println("Messaggio inviato a " + f.getFirst_name());
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    
 
     private static StringBuilder readUrl(URL u) throws IOException {
         br = new BufferedReader(new InputStreamReader(u.openStream()));

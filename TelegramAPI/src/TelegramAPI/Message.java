@@ -33,4 +33,8 @@ class Message {
                + "date: " + new Date(Long.parseLong(date+"") * 1000) + "\n"
                + "text: " + text + "\n"; 
     }
+
+    public String getText() {
+        return text;
+    }
 }

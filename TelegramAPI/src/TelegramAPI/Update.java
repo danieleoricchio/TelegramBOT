@@ -16,6 +16,12 @@ public class Update {
         this.update_id = update_id;
         this.message = message;
     }
+
+    public Update() {
+        update_id = 0;
+        message = null;
+    }
+    
     
     public String getUpdate(){
         return "GET_UPDATES" + "\n"

@@ -27,4 +27,8 @@ public class Chat {
                + "username: " + username + "\n"
                + "type: " + type + "\n";
     }
+
+    public long getId() {
+        return id;
+    }
 }
