@@ -37,4 +37,8 @@ class Message {
     public String getText() {
         return text;
     }
+
+    public Chat getChat() {
+        return c;
+    }
 }

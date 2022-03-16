@@ -15,8 +15,7 @@ import java.util.Scanner;
 public class Bot {
 
     public static void main(String[] args) throws IOException {
-        getLastMessage glm = new getLastMessage();
-        ThreadUpdates tu = new ThreadUpdates();
-        tu.start();
+        GetLastUpdate_thread getLast = new GetLastUpdate_thread();
+        getLast.start();
     }
 }

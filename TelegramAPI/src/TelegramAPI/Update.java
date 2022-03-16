@@ -28,4 +28,16 @@ public class Update {
                + "update_id: " + update_id + "\n"
                + "message: " + message.getMessage() + "\n";
     }
+
+    public long getUpdate_id() {
+        return update_id;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+    
+    
+    
+    
 }

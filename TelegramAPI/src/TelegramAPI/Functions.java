@@ -13,7 +13,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -23,11 +24,7 @@ public class Functions {
 
     private static BufferedReader br;
     private static From f;
-    private static Message m;
-    private static Update u;
-    private static Chat c;
-    private static JSONObject obj;
-    private static long updateId;
+    private static ArrayList<Update> updates;
 
     public static void getMe(String token) {
         try {
@@ -52,16 +49,16 @@ public class Functions {
     }
 
     public static ArrayList<Update> getUpdates() {
-        ArrayList<Update> upd = new ArrayList<Update>();
         try {
+            updates = new ArrayList<Update>();
             URL url = new URL("https://api.telegram.org/bot5275177108:AAEdwgLIJEf04JOh3NAF4a0jCCC6QXSbohU/getUpdates");
             StringBuilder sb = readUrl(url);
-            obj = new JSONObject(sb.toString().trim());
+            JSONObject obj = new JSONObject(sb.toString().trim());
             String pageName = obj.getBoolean("ok") ? "true" : "false";
 
             JSONArray arr = obj.getJSONArray("result");
             for (int i = 0; i < arr.length(); i++) {
-                c = new Chat(arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getLong("id"),
+                Chat c = new Chat(arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getLong("id"),
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getString("first_name"),
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getString("username"),
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("chat").getString("type"));
@@ -72,24 +69,38 @@ public class Functions {
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("from").getString("username"),
                         arr.getJSONObject(i).getJSONObject("message").getJSONObject("from").getString("language_code"));
 
-                m = new Message(arr.getJSONObject(i).getJSONObject("message").getLong("message_id"), f, c,
+                Message m = new Message(arr.getJSONObject(i).getJSONObject("message").getLong("message_id"), f, c,
                         arr.getJSONObject(i).getJSONObject("message").getLong("date"),
                         arr.getJSONObject(i).getJSONObject("message").getString("text"));
 
-                u = new Update(arr.getJSONObject(i).getLong("update_id"), m);
-                updateId = arr.getJSONObject(i).getLong("update_id");
-
-                upd.add(u);
+                Update u = new Update(arr.getJSONObject(i).getLong("update_id"), m);
+                updates.add(u);
             }
         } catch (MalformedURLException ex) {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return upd;
+        return updates;
     }
 
-    
+    public static void printMessage(Message msg) {
+        if (msg.getText().equals("/citta")) {
+            sendMessage("ciao", msg.getChat().getId());
+        }
+    }
+
+    public static void sendMessage(String message, long chat_id) {
+        try {
+            URL url = new URL("https://api.telegram.org/bot5275177108:AAEdwgLIJEf04JOh3NAF4a0jCCC6QXSbohU/sendMessage?chat_id=" + chat_id + "&text=" + message);
+            url.openStream();
+            System.out.println("Messaggio inviato a " + f.getFirst_name());
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     private static StringBuilder readUrl(URL u) throws IOException {
         br = new BufferedReader(new InputStreamReader(u.openStream()));
