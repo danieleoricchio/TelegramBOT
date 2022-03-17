@@ -23,7 +23,7 @@ public class GetLastUpdate_thread extends Thread {
             try {
                 newUpdates = Functions.getUpdates();
                 if(newUpdates.size() != oldUpdates.size()){
-                    Functions.printMessage(newUpdates.get(newUpdates.size() - 1).getMessage());
+                    Functions.checkMessage(newUpdates.get(newUpdates.size() - 1).getMessage());
                 }
                 Thread.sleep(300);
             } catch (InterruptedException ex) {

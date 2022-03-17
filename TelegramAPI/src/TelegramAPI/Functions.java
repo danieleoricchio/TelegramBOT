@@ -84,9 +84,13 @@ public class Functions {
         return updates;
     }
 
-    public static void printMessage(Message msg) {
-        if (msg.getText().equals("/citta")) {
-            sendMessage("ciao", msg.getChat().getId());
+    public static void checkMessage(Message msg) {
+        String comando = msg.getText().substring(0, 6);
+        String text = msg.getText().substring(7);
+        long chat_id = msg.getChat().getId();
+        if (comando.equals("/citta")) {
+            sendMessage(ParseXml.getLocation(text).toString(), chat_id);
+            sendLocation(ParseXml.getLocation(text), chat_id);
         }
     }
 
@@ -94,7 +98,6 @@ public class Functions {
         try {
             URL url = new URL("https://api.telegram.org/bot5275177108:AAEdwgLIJEf04JOh3NAF4a0jCCC6QXSbohU/sendMessage?chat_id=" + chat_id + "&text=" + message);
             url.openStream();
-            System.out.println("Messaggio inviato a " + f.getFirst_name());
         } catch (MalformedURLException ex) {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -102,15 +105,31 @@ public class Functions {
         }
     }
 
-    private static StringBuilder readUrl(URL u) throws IOException {
-        br = new BufferedReader(new InputStreamReader(u.openStream()));
-        StringBuilder sb = new StringBuilder();
-        String inputLine = "";
-        while ((inputLine = br.readLine()) != null) {
-            sb.append(inputLine);
-            sb.append(System.lineSeparator());
+    public static void sendLocation(Location location, long chat_id) {
+        try {
+            URL url = new URL("https://api.telegram.org/bot5275177108:AAEdwgLIJEf04JOh3NAF4a0jCCC6QXSbohU/sendLocation?chat_id=" + chat_id + "&latitude=" + location.getLatitude() + "&longitude=" + location.getLongitude());
+            url.openStream();
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         }
-        br.close();
-        return sb;
+    }
+
+    private static StringBuilder readUrl(URL u) {
+        try {
+            br = new BufferedReader(new InputStreamReader(u.openStream()));
+            StringBuilder sb = new StringBuilder();
+            String inputLine = "";
+            while ((inputLine = br.readLine()) != null) {
+                sb.append(inputLine);
+                sb.append(System.lineSeparator());
+            }
+            br.close();
+            return sb;
+        } catch (IOException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 }
