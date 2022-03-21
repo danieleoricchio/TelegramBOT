@@ -12,7 +12,7 @@ import java.util.Scanner;
  *
  * @author Daniele
  */
-public class Bot {
+public class bot {
 
     public static void main(String[] args) throws IOException {
         GetLastUpdate_thread getLast = new GetLastUpdate_thread();

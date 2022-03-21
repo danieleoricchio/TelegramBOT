@@ -5,11 +5,17 @@
 package TelegramAPI;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +31,7 @@ public class Functions {
     private static BufferedReader br;
     private static From f;
     private static ArrayList<Update> updates;
+    private final static String percorso = "src//bot//dati.txt";
 
     public static void getMe(String token) {
         try {
@@ -91,10 +98,11 @@ public class Functions {
         if (comando.equals("/citta")) {
             sendMessage(ParseXml.getLocation(text).toString(), chat_id);
             sendLocation(ParseXml.getLocation(text), chat_id);
+            saveOnCsv(chat_id, ParseXml.getLocation(text));
         }
     }
 
-    public static void sendMessage(String message, long chat_id) {
+    private static void sendMessage(String message, long chat_id) {
         try {
             URL url = new URL("https://api.telegram.org/bot5275177108:AAEdwgLIJEf04JOh3NAF4a0jCCC6QXSbohU/sendMessage?chat_id=" + chat_id + "&text=" + message);
             url.openStream();
@@ -105,7 +113,7 @@ public class Functions {
         }
     }
 
-    public static void sendLocation(Location location, long chat_id) {
+    private static void sendLocation(Location location, long chat_id) {
         try {
             URL url = new URL("https://api.telegram.org/bot5275177108:AAEdwgLIJEf04JOh3NAF4a0jCCC6QXSbohU/sendLocation?chat_id=" + chat_id + "&latitude=" + location.getLatitude() + "&longitude=" + location.getLongitude());
             url.openStream();
@@ -113,6 +121,27 @@ public class Functions {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private static void saveOnCsv(long chat_id, Location loc) {
+        FileWriter fw = null;
+        try {
+            File file = new File(percorso);
+            fw = new FileWriter(file, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.append(chat_id + ";" + f.getFirst_name() + ";" + loc.getLatitude() + ";" + loc.getLongitude() + "\n");
+            System.out.println("Utente salvato su csv");
+            bw.flush();
+            bw.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fw.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
