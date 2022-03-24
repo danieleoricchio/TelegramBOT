@@ -37,7 +37,32 @@ public class ParseXml {
             for (int i = 0; i < nList.getLength(); i++) {
                 Node node = nList.item(i);
                 element = (Element) node;
-                Location location = new Location(Double.parseDouble(element.getAttribute("lat")), 
+                Location location = new Location(Double.parseDouble(element.getAttribute("lat")),
+                        Double.parseDouble(element.getAttribute("lon")), element.getAttribute("display_name"));
+                return location;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ParseXml.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SAXException ex) {
+            Logger.getLogger(ParseXml.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(ParseXml.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public static Location getLocation(double lat, double lon) {
+        try {
+            URL url = new URL("https://nominatim.openstreetmap.org/reverse?lat=" + lat + "&lon=" + lon + "&format=xml&addressdetails=1");
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            var document = builder.parse(url.openStream());
+            Element root = document.getDocumentElement(), element = null;
+            NodeList nList = document.getElementsByTagName("place");
+            for (int i = 0; i < nList.getLength(); i++) {
+                Node node = nList.item(i);
+                element = (Element) node;
+                Location location = new Location(Double.parseDouble(element.getAttribute("lat")),
                         Double.parseDouble(element.getAttribute("lon")), element.getAttribute("display_name"));
                 return location;
             }

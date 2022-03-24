@@ -7,6 +7,8 @@ package TelegramAPI;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
@@ -31,6 +34,9 @@ public class Functions {
     private static BufferedReader br;
     private static From f;
     private static ArrayList<Update> updates;
+    private static ArrayList<Utente> users;
+    private static Utente user;
+    private static long chat_id;
     private final static String percorso = "src//bot//dati.txt";
 
     public static void getMe(String token) {
@@ -94,7 +100,7 @@ public class Functions {
     public static void checkMessage(Message msg) {
         String comando = msg.getText().substring(0, 6);
         String text = msg.getText().substring(7);
-        long chat_id = msg.getChat().getId();
+        chat_id = msg.getChat().getId();
         if (comando.equals("/citta")) {
             sendMessage(ParseXml.getLocation(text).toString(), chat_id);
             sendLocation(ParseXml.getLocation(text), chat_id);
@@ -102,7 +108,7 @@ public class Functions {
         }
     }
 
-    private static void sendMessage(String message, long chat_id) {
+    public static void sendMessage(String message, long chat_id) {
         try {
             URL url = new URL("https://api.telegram.org/bot5275177108:AAEdwgLIJEf04JOh3NAF4a0jCCC6QXSbohU/sendMessage?chat_id=" + chat_id + "&text=" + message);
             url.openStream();
@@ -125,23 +131,77 @@ public class Functions {
     }
 
     private static void saveOnCsv(long chat_id, Location loc) {
-        FileWriter fw = null;
         try {
             File file = new File(percorso);
-            fw = new FileWriter(file, true);
+            Scanner scanner = new Scanner(file);
+            StringBuffer stringBuffer = new StringBuffer();
+            String rigaDaModificare = null;
+            while (scanner.hasNextLine()) {
+                String riga = scanner.nextLine();
+                if (riga.contains(String.valueOf(chat_id))) {
+                    rigaDaModificare = riga;
+                }
+                stringBuffer.append(riga + System.lineSeparator());
+            }
+            String contents = stringBuffer.toString();
+            scanner.close();
+            if (rigaDaModificare != null) {
+                contents = contents.replaceAll(rigaDaModificare, chat_id + ";" + f.getFirst_name() + ";" + loc.getLatitude() + ";" + loc.getLongitude());
+            } else {
+                contents += chat_id + ";" + f.getFirst_name() + ";" + loc.getLatitude() + ";" + loc.getLongitude() + System.lineSeparator();
+            }
+            user = new Utente(chat_id, f.getFirst_name(), loc.getLatitude(), loc.getLongitude());
+            users.add(user);
+            try {
+                contents = contents.trim();
+                FileWriter writer = new FileWriter(file);
+                writer.write(contents);
+                writer.close();
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+    
+    public static Location getLocation(){
+        return ParseXml.getLocation(user.getLat(), user.getLon());
+    }
+
+    public static long getChat_id() {
+        return chat_id;
+    }
+
+    private static String readCSV() {
+        try {
+            FileReader fr = new FileReader(percorso);
+            BufferedReader br = new BufferedReader(fr);
+
+            String linea = "";
+            while ((linea = br.readLine()) != null) {
+                return linea;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
+    public static void writeOnFile() {
+        try {
+
+            File file = new File(percorso);
+            FileWriter fw = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(fw);
-            bw.append(chat_id + ";" + f.getFirst_name() + ";" + loc.getLatitude() + ";" + loc.getLongitude() + "\n");
-            System.out.println("Utente salvato su csv");
+
+            //bw.append(chat_id + ";" + f.getFirst_name() + ";" + loc.getLatitude() + ";" + loc.getLongitude() + "\n");
+
             bw.flush();
             bw.close();
         } catch (IOException ex) {
-            Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                fw.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Functions.class.getName()).log(Level.SEVERE, null, ex);
-            }
+
         }
     }
 
@@ -161,4 +221,5 @@ public class Functions {
         }
         return null;
     }
+
 }
