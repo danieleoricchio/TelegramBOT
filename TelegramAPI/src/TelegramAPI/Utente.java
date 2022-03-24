@@ -4,30 +4,28 @@
  */
 package TelegramAPI;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Daniele
  */
 public class Utente {
+
     private long chat_id;
     private String nome;
-    private double lat;
-    private double lon;
+    private Location location;
 
-    public Utente(long chat_id, String nome, double lat, double lon) {
+    public Utente(long chat_id, String nome, Location location) throws IOException {
         this.chat_id = chat_id;
         this.nome = nome;
-        this.lat = lat;
-        this.lon = lon;
+        this.location = location;
     }
-
-    public double getLat() {
-        return lat;
+    public Location getLocation() {
+        return location;
     }
-
-    public double getLon() {
-        return lon;
-    }
-        
-    
 }

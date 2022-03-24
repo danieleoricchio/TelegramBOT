@@ -5,7 +5,18 @@
 package bot;
 
 import TelegramAPI.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -14,12 +25,27 @@ import java.util.ArrayList;
 public class Main extends javax.swing.JFrame {
 
     private ArrayList<Pubblicita> listaPubblicita;
+    private ArrayList<Utente> users ;
+    private Utente u;
 
-    public Main() {
+    public Main() throws IOException {
         initComponents();
         GetLastUpdate_thread getLast = new GetLastUpdate_thread();
         getLast.start();
         listaPubblicita = new ArrayList<Pubblicita>();
+        users = new ArrayList<Utente>();
+        creaUtenti();
+    }
+
+    private void creaUtenti() throws FileNotFoundException, IOException {
+        List<String> lines = Files.readAllLines(Paths.get("dati.txt"));
+        System.out.println(lines);
+        for (String line : lines) {
+            String[] campi = line.split(";");
+            Utente u = new Utente(Long.parseLong(campi[0]), campi[1], ParseXml.getLocation(Double.valueOf(campi[2]), Double.valueOf(campi[3])));
+            System.out.println(u.toString());
+            users.add(u);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -107,8 +133,11 @@ public class Main extends javax.swing.JFrame {
         Pubblicita p = new Pubblicita(txtCitta.getText(), Integer.parseInt(txtRaggio.getText()), txtTesto.getText());
         listaPubblicita.add(p);
         for (int i = 0; i < listaPubblicita.size(); i++) {
-            if (GetDistance.GetDistanceKilometers(listaPubblicita.get(i).getLocGestore(), Functions.getLocation()) < raggio) {
-                Functions.sendMessage("Pubblicita da: " + txtCitta.getText(), Functions.getChat_id());
+            for (int j = 0; j < users.size(); j++) {
+                System.out.println(users.size());
+                if (GetDistance.GetDistanceKilometers(listaPubblicita.get(i).getLocGestore(), users.get(j).getLocation()) < raggio) {
+                    Functions.sendMessage("Pubblicita da: " + txtCitta.getText(), Functions.getChat_id());
+                }
             }
         }
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -143,7 +172,11 @@ public class Main extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Main().setVisible(true);
+                try {
+                    new Main().setVisible(true);
+                } catch (IOException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }

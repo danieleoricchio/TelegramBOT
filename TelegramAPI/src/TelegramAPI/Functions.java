@@ -34,10 +34,8 @@ public class Functions {
     private static BufferedReader br;
     private static From f;
     private static ArrayList<Update> updates;
-    private static ArrayList<Utente> users;
-    private static Utente user;
     private static long chat_id;
-    private final static String percorso = "src//bot//dati.txt";
+    private final static String percorso = "dati.txt";
 
     public static void getMe(String token) {
         try {
@@ -150,8 +148,6 @@ public class Functions {
             } else {
                 contents += chat_id + ";" + f.getFirst_name() + ";" + loc.getLatitude() + ";" + loc.getLongitude() + System.lineSeparator();
             }
-            user = new Utente(chat_id, f.getFirst_name(), loc.getLatitude(), loc.getLongitude());
-            users.add(user);
             try {
                 contents = contents.trim();
                 FileWriter writer = new FileWriter(file);
@@ -166,10 +162,6 @@ public class Functions {
 
     }
     
-    public static Location getLocation(){
-        return ParseXml.getLocation(user.getLat(), user.getLon());
-    }
-
     public static long getChat_id() {
         return chat_id;
     }
